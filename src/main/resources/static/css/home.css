@@ -1,0 +1,14 @@
+.admin-message-text {
+	font-style: normal;
+	font-size: 22px;
+	color: #004080;
+}
+
+.yellow-row .x-grid-row{
+	background-color: yellow !important;
+	}
+	
+	.x-mask{
+		
+		background-color: rgba(6, 6, 6, 0.7);
+	}

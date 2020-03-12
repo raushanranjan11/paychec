@@ -1,0 +1,16 @@
+.yellow-row .x-grid-cell{
+	background-color: #ffffb3 !important;
+	}
+
+.green-row .x-grid-cell{
+	background-color: #b3ffb3 !important;
+	}
+
+.red-row .x-grid-cell{
+	background-color: #ffb3b3 !important;
+	}
+	
+	.x-mask{
+		
+		background-color: rgba(6, 6, 6, 0.7);
+	}

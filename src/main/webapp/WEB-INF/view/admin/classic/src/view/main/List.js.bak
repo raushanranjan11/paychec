@@ -1,0 +1,79 @@
+/**
+ * This view is an example list of people.
+ */
+Ext.define('MyApp.view.main.List', {
+    extend: 'Ext.grid.Panel',
+    xtype: 'mainlist',
+
+    requires: [
+        'MyApp.store.Personnel',
+		'MyApp.store.CustomerStore'
+    ],
+
+    title: 'Car List',
+
+   /* store: {
+        type: 'customer'
+    },*/
+	store:Ext.create('MyApp.store.CustomerStore'),//'customer',
+
+    columns: [
+	{ text: 'Id',  dataIndex: 'id' },
+	{ text: 'Date',  dataIndex: 'date' },
+	{ text: 'Vech(Name)',  dataIndex: 'vName' },
+	{ text: 'Cust(Name)',  dataIndex: 'cName' },
+	{ text: 'Vech(Number)',  dataIndex: 'vNumber' },
+	{ text: 'Mobile',  dataIndex: 'mobile' },
+        { text: 'Estimate',  dataIndex: 'estimatePrice' },
+        { text: 'Ready', dataIndex: 'ready', },
+        { text: 'Bill', dataIndex: 'bill', flex: 1 },
+		{ text: 'Discount',  dataIndex: 'discount' },
+		{ text: 'Payment',  dataIndex: 'payment' },
+		{ text: 'Due',  dataIndex: 'due' },
+		{ text: 'Technician',  dataIndex: 'technician' }
+    ],
+	/**plugins: {
+        rowexpander: {
+			 ptype: 'rowexpander',
+            rowBodyTpl: new Ext.XTemplate(
+                '<p><b>Vech(Name):</b> {vName}</p>',
+                '<p><b>Cust(Name):</b> {cName}</p>',
+            /*    {
+                    formatChange: function (v) {
+                        var color = v >= 0 ? 'green' : 'red';
+                        return '<span style="color: ' + color + ';">' +
+                            Ext.util.Format.usMoney(v) + '</span>';
+                    }
+                }
+				
+				)
+        }
+    },*/
+	plugins: [
+            {
+                ptype: 'rowexpander',
+                rowBodyTpl: [
+                    '<table>',
+                    '<tpl foreach=".">',
+                    '<tr><td>{$}</td><td>{.}</td></tr>',
+                    '</tpl>',
+                    '</table>'
+                ]
+            }
+        ],
+    viewConfig: {
+        enableTextSelection: true
+    },
+	dockedItems: [{
+                xtype: 'pagingtoolbar',
+                bind: {
+                    store: '{personnel}'
+                },
+                dock: 'bottom',
+                displayInfo: true
+            }],
+
+    listeners: {
+        select: 'onItemSelected'
+    }
+});

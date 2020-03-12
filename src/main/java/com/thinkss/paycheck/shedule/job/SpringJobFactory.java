@@ -1,0 +1,30 @@
+package com.thinkss.paycheck.shedule.job;
+
+import org.quartz.spi.TriggerFiredBundle;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.scheduling.quartz.SpringBeanJobFactory;
+
+public class SpringJobFactory extends SpringBeanJobFactory implements ApplicationContextAware {
+    
+    
+    private transient AutowireCapableBeanFactory beanFactory;
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    	System.out.println("***************************applicationContext******************************");
+ 
+        beanFactory = applicationContext.getAutowireCapableBeanFactory();
+    }
+ 
+    @Override
+    protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
+    	System.out.println("***************************bundle******************************");
+        final Object job = super.createJobInstance(bundle);
+        beanFactory.autowireBean(job);
+        return job;
+    }
+    
+    
+}

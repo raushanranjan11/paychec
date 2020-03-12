@@ -1,0 +1,60 @@
+Ext.define('MyApp.store.CustomerStore', {
+    extend: 'Ext.data.Store',
+
+	 alias: 'store.customer',
+
+    constructor: function(cfg) {
+        var me = this;
+        cfg = cfg || {};
+        me.callParent([Ext.apply({
+            storeId: 'customer',
+            
+              
+			//pageSize : 15,
+		//	remoteSort:true,
+				autoLoad: true,
+           proxy: {
+              //  type: 'jsonp',
+				//	callbackKey:'call',
+				type: 'ajax',
+
+				//s noCache : true,
+					 
+				//	useDefaultXhrHeader = false,
+					method:'GET',
+						//callbackKey: 'dataReceived',
+                url: 'http://localhost:8090/cargarage/all',//?json.wrf=call'',	
+			//		api: {
+          //     read: 'GET'
+          //  },
+              //  simpleSortMode: true,
+                reader: {
+                	type: 'json',
+                    rootProperty: 'customers'
+                }
+            },
+				 // callbackKey: 'callback1',
+        call: function()
+       {
+          console.log("call");
+       },
+
+
+		/*	 autoLoad: true,
+				proxy: {
+        type: 'ajax',
+			url: 'http://localhost:8090/cargarage/all',	
+			//url: localUrl.getServerURL()+'/cargarage/all',	
+        reader: {
+            type: 'json',
+            rootProperty: 'customers'
+        }
+    },*/
+            fields: [
+                    // {name: 'IAIABC_BENEFIT_TYPE_CODE', mapping: 'iaiabcBenefitTypeCode'},
+                      'id', 'cName', 'vName','vNumber','date','estimatePrice','ready','mobile','bill','discount','payment','due','technician'
+                     ] 
+				 
+        }, cfg)]);
+    }
+});

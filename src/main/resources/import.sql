@@ -1,0 +1,12 @@
+INSERT INTO authority (id, name) VALUES(1, 'ROLE_USER'),(2, 'ROLE_ADMIN');
+INSERT INTO document_type (id, name) VALUES(1, 'Social'),(2, 'KYC'),(3, 'Financial');
+  
+INSERT INTO document_sub_type (id, folder_name, name, document_id) VALUES(1, 'bank_statement', 'Bank Statements(last 6 months)', 3),(2, 'sa_cerificate', 'Salary Certificate', 3),(3, 'emirates_id', 'Emirates ID', 2),(4, 'passport', 'Passport', 2),(5, 'uae_proof', 'UAE proof(phone,water,electric city)', 2),(6, 'residence_visa', 'UAE residence visa', 2),	(7, NULL, 'Email', 1),(8, NULL, 'Facebook', 1),(9, NULL, 'LinkedIn', 1);
+  
+INSERT INTO loan_type (id, loan_limit, loan_description, loan_image, loan_name) VALUES(1, 10000.00, 'Manage Your Personnel Life', 'http://185.78.163.41:8080/paychec/loan_image/personnel/personal_loan@1x.png', 'Personnel Loan'),(2, 5000.00, 'Manage Your Car Loan', 'http://185.78.163.41:8080/paychec/loan_image/car/auto_loan@1x.png', 'Car Loan'),(3, 20000.00, 'Manage Your Home Loan', 'http://185.78.163.41:8080/paychec/loan_image/home/home_loan@1x.png', 'Home Loan');
+  
+INSERT INTO loan_interest (id, month, processing_fee, rate, loan_type_id) VALUES(1, 3, 120.00, 2.30, 1),(2, 6, 150.00, 3.40, 1),(3, 9, 200.00, 4.60, 1),(4, 12, 50.00, 2.90, 1),(5, 15, 10.00, 1.20, 1),(6, 18, 20.00, 2.30, 1),(7, 21, 30.00, 3.40, 1),(8, 24, 40.00, 4.50, 1),(9, 27, 50.00, 2.40, 1),(10, 30, 60.00, 1.50, 1),(11, 33, 70.00, 2.50, 1),(12, 36, 80.00, 3.50, 1),(13, 3, 120.00, 2.30, 2),(14, 6, 150.00, 3.40, 2),(15, 9, 200.00, 4.60, 2),(16, 12, 50.00, 2.90, 2);
+
+INSERT INTO country ('id', 'name', 'iso_code', 'iso3_code') VALUES(1, 'Bahrain', 'BHR', 48),(2, 'Qatar', 'QAT', 634),(3, 'Saudi Arabia', 'SAU', 682),(4, 'United Arab Emirates', 'UAE', 784),(5, 'Kuwait', 'KWT', 414),(6, 'Oman', 'OMN', 512);
+INSERT INTO bank_name ('id', 'name', 'country_id', 'logo') VALUES(1, 'National Bank of Bahrain', 1, '/bank_image/nbb_logo.png'),(2, 'Bank of Bahrain and Kuwait', 1, '/bank_image/bbk_logo.png'),(3, 'Qatar Islamic Bank', 2, '/bank_image/qib_logo.png'),(4, 'Ahli Bank Qatar', 2, '/bank_image/ahli_logo.jpg'),(5, 'Qatar Central Bank', 2, '/bank_image/qnb_logo.jpg'),(6, 'National Bank of Oman', 6, '/bank_image/nbo_logo.png'),(7, 'Oman Arab Bank', 6, '/bank_image/oab_logo.png'),(8, 'Emirates NBD', 4, '/bank_image/oab_logo.jpg'),(9, 'Abu Dhabi Commercial Bank', 4, '/bank_image/enbd_logo.gif');
+INSERT INTO country_banks ('country_id', 'bank_id') VALUES(1, 1),(1, 2),(2, 3),(2, 4),(2, 5),(6, 6),(6, 7),(4, 8),(4, 9);
