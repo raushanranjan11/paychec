@@ -40,28 +40,15 @@ public class UserController {
 	/* changing password with old and new passwords */
 
 	@RequestMapping(value = "/passwordChange", method = RequestMethod.POST, consumes = { "application/json" })
-	public ResponseEntity<?> changePassword(
-			// HttpServletRequest request
-			@RequestBody PasswordChanger passwordChanger
-
-	) throws JSONException {
-
-		String oldPassword = passwordChanger.oldPassword;
-		String newPassword = passwordChanger.newPassword;
-
-		System.out.println(oldPassword + "    " + newPassword);
-
-		System.out.println(SecurityContextHolder.getContext().getAuthentication());
+	public ResponseEntity<?> changePassword(@RequestBody PasswordChanger passwordChanger) throws JSONException {
 
 		boolean isChanged = userDetailsService.changeOldPassword(passwordChanger.oldPassword,
 				passwordChanger.newPassword);
 
-		// Map<String, Object> result = new HashMap<>();
 		if (isChanged) {
 			return ResponseEntity.ok(new UserSignInToken(true, "Password is updated "));
 		} else {
-			return ResponseEntity
-					.ok(new UserSignInToken(false, "No authentication manager set. can't change Password!"));
+			return ResponseEntity.ok(new UserSignInToken(false, "Your current password is wrong."));
 		}
 
 	}
@@ -72,7 +59,8 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/{id}/update", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateUserProfile(@PathVariable("id") long id, @RequestBody Registration user) throws ParseException {
+	public ResponseEntity<?> updateUserProfile(@PathVariable("id") long id, @RequestBody Registration user)
+			throws ParseException {
 		System.out.println("Updating User " + id);
 		Map<String, Object> map = new HashMap<String, Object>();
 		User currentUser = userService.findById(id);
@@ -88,10 +76,10 @@ public class UserController {
 				currentUser.setPhoneNumber(user.getPhoneNumber());
 			if (user.getEmailId() != null && user.getEmailId() != "")
 				currentUser.setEmailId(user.getEmailId());
-			
-			if (user.getBirthDate() != null  && user.getBirthDate() != "" ) {
-				 DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-		         Date birthDate = df.parse(user.getBirthDate());
+
+			if (user.getBirthDate() != null && user.getBirthDate() != "") {
+				DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+				Date birthDate = df.parse(user.getBirthDate());
 				currentUser.setBirthDate(birthDate);
 			}
 
@@ -100,18 +88,14 @@ public class UserController {
 			map.put("user", u);
 			return ResponseEntity.ok(map);
 		}
-		// return map;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<?> getUser(@PathVariable("id") long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		// User currentUser = payCheckDao.findUserById(id);
 		User currentUser = userService.findById(id);
-
 		map.put("status", true);
 		map.put("user", currentUser);
-		// return map;
 		return ResponseEntity.ok(map);
 	}
 }

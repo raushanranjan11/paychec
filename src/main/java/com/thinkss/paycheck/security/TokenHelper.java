@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mobile.device.Device;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,8 @@ import com.thinkss.paycheck.entity.User;
 //import com.artivatic.model.User;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import java.util.Date;
 
 
@@ -49,6 +52,10 @@ public class TokenHelper {
     TimeProvider timeProvider;
 
     private SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
+    
+//    private String secret = "ThisIsASecret";
+    private String tokenPrefix = "Bearer";
+    private String headerString = "Authorization";
 
     public String getUsernameFromToken(String token) {
         String username;
@@ -113,6 +120,36 @@ public class TokenHelper {
                 .signWith( SIGNATURE_ALGORITHM, SECRET )
                 .compact();
     }
+    
+    public void addAuthentication(HttpServletResponse response, String username,Device device) {
+        // We generate a token now.
+        String JWT = Jwts.builder()
+            .setSubject(username)
+            .setExpiration(generateExpirationDate(device))
+            .signWith(SignatureAlgorithm.HS512, SECRET)
+            .compact();
+        response.addHeader(headerString, tokenPrefix + " " + JWT);
+    }
+    
+    public Authentication getAuthentication(HttpServletRequest request) {
+    	
+    	System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^Authentication^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        String token = request.getHeader(headerString);
+        if (token != null) {
+            // parse the token.
+            String username = Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+            if (username != null) // we managed to retrieve a user
+            {
+            	System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+//                return new AuthenticatedUser(username);
+            }
+        }
+        return null;
+    }
 
     private String generateAudience(Device device) {
         String audience = AUDIENCE_UNKNOWN;
@@ -154,8 +191,8 @@ public class TokenHelper {
         final Date created = getIssuedAtDateFromToken(token);
         return (
                 username != null &&
-                username.equals(userDetails.getUsername()) &&
-                        !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())
+                username.equals(userDetails.getUsername()) 
+                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())
         );
     }
 

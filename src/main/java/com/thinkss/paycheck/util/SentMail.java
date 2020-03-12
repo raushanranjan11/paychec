@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.thinkss.paycheck.entity.User;
-
+//                   not using 
 @Service
 public class SentMail {
 	

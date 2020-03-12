@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +23,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -47,10 +51,16 @@ public class Loan implements Serializable{
 //	private float LoanInterestRate;
 
 //	private String loanStartMonth;
-//	private String loanValidMonth;
+//	private String loanValidMonth;//is_proccess
 	private User user;
 	private InterestRate interestRate;
 	private Date loanCreatedDate;
+	private BigDecimal paidAmount ;
+	private BigDecimal unPaidAmount;
+	
+	private UserBankAccount userBankAccount;
+	
+//	private boolean process;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -66,6 +76,18 @@ public class Loan implements Serializable{
 	}
 	public void setLoanAmount(BigDecimal loanAmount) {
 		this.loanAmount = loanAmount;
+	}
+	
+	private String loanRefrenceNumber;
+	
+	
+	
+	@Column(name = "loan_refrence")
+	public String getLoanRefrenceNumber() {
+		return loanRefrenceNumber;
+	}
+	public void setLoanRefrenceNumber(String loanRefrenceNumber) {
+		this.loanRefrenceNumber = loanRefrenceNumber;
 	}
 	/*@Column(name = "loan_intrest_rate")
 	public float getLoanInterestRate() {
@@ -135,7 +157,7 @@ public class Loan implements Serializable{
 		this.loanTenure = loanTenure;
 	}*/
 	
-	private UserBankAccount userBankAccount;
+	
 	
 	@JsonIgnore
 	@OneToOne//original
@@ -188,6 +210,7 @@ public class Loan implements Serializable{
 	private List<PaidLoan>  paidLoan;
 	
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL,	fetch = FetchType.LAZY, mappedBy = "loan")
 	public List<PaidLoan> getPaidLoan() {
 		return paidLoan;
@@ -199,8 +222,7 @@ public class Loan implements Serializable{
 	}
 	
 	
-	private BigDecimal paidAmount ;
-	private BigDecimal unPaidAmount;
+	
 	@Transient
 	public BigDecimal getPaidAmount() {
 		return paidAmount;
@@ -215,7 +237,59 @@ public class Loan implements Serializable{
 	public void setUnPaidAmount(BigDecimal unPaidAmount) {
 		this.unPaidAmount = unPaidAmount;
 	}
+	//is_proccess
+	/*@Column(name = "is_proccess")
+	public boolean isProcess() {
+		return process;
+	}
+	public void setProcess(boolean process) {
+		this.process = process;
+	}
+	*/
+	
+	private LoanStatus loanStatus;
 	
 	
+//	@OneToMany(cascade = CascadeType.ALL,	fetch = FetchType.LAZY, mappedBy = "loan")
+	@JsonIgnore
+	@OneToOne//original
+	(cascade =CascadeType.ALL,
+	//{CascadeType.PERSIST, CascadeType.MERGE},
+	fetch = FetchType.LAZY)
+	@JoinColumn(name="loan_status_id")
+//	@Column(name = "loan_status_id")
+	public LoanStatus getLoanStatus() {
+		return loanStatus;
+	}
+	public void setLoanStatus(LoanStatus loanStatus) {
+		this.loanStatus = loanStatus;
+	}
+	
+	private Long loanStatusId;
+	@Transient
+	public Long getLoanStatusId() {
+//		return loanStatusId;
+		return this.getLoanStatus().getId();
+	}
+	public void setLoanStatusId(Long loanStatusId) {
+		this.loanStatusId = loanStatusId;
+	}
+	
+	
+	
+	private List<LoanStatusHistory> loanStatusHistory;
+	
+	
+	@JsonIgnore
+//	@LazyCollection(LazyCollectionOption.FALSE)
+//	@Access(AccessType.PROPERTY)
+	@OneToMany(cascade = CascadeType.ALL,	fetch = FetchType.LAZY, mappedBy = "loan")
+	public List<LoanStatusHistory> getLoanStatusHistory() {
+		return loanStatusHistory;
+	}
+	public void setLoanStatusHistory(List<LoanStatusHistory> loanStatusHistory) {
+		this.loanStatusHistory = loanStatusHistory;
+	}
+
 	
 }

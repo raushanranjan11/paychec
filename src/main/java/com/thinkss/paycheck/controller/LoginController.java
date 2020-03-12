@@ -30,7 +30,6 @@ import com.thinkss.paycheck.util.SentMail;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 import java.io.IOException;
 import java.util.Date;
 
@@ -54,14 +53,12 @@ public class LoginController {
 
 	@Autowired
 	private UserService userService;
-
-
-
+//              ----------------------------------------Not using------------------------------------------------
 	@RequestMapping(value = "/logins", method = RequestMethod.POST, consumes = { "application/json" })
 	public ResponseEntity<?> createAuthenticationTokens(@RequestBody JwtAuthenticationRequest authenticationRequest,
 			HttpServletResponse response, Device device) throws AuthenticationException, IOException {
 
-		System.out				.println("sign User  " + authenticationRequest.getEmailId() + " " + authenticationRequest.getPassword());
+		System.out.println( "sign User  " + authenticationRequest.getEmailId() + " " + authenticationRequest.getPassword());
 		ResponseEntity<?> responseEntity = null;
 		if (authenticationRequest.getEmailId() != null && authenticationRequest.getEmailId() != "") {
 
@@ -71,11 +68,11 @@ public class LoginController {
 				if (registerWithEmail.isLoginProvier()) {
 					System.out.println("Facebook login");
 					if (registerWithEmail.getPassword() == null) {
-//						System.out.println("^^^^^^^^^^^^^^^^^");
+						// System.out.println("^^^^^^^^^^^^^^^^^");
 						boolean idProof = false;
-						if ((registerWithEmail.getKycFrontPic() != null && registerWithEmail.getKycBackPic() != null)  && 
-								( registerWithEmail.getKycFrontPic() == "" && registerWithEmail.getKycBackPic() == "")
-								) {
+						if ((registerWithEmail.getKycFrontPic() != null && registerWithEmail.getKycBackPic() != null)
+								&& (registerWithEmail.getKycFrontPic() == ""
+										&& registerWithEmail.getKycBackPic() == "")) {
 							idProof = true;
 						}
 						return ResponseEntity.ok(new UserSignInToken(false, registerWithEmail.isLoginProvier(), idProof,
@@ -84,26 +81,28 @@ public class LoginController {
 								registerWithEmail.getProfilePic()));
 
 					} else {
+						
+						
+						
 						try {
 							// Perform the security
-							final Authentication authentication = authenticationManager
-									.authenticate(new UsernamePasswordAuthenticationToken(
-											 authenticationRequest.getEmailId(),
-//											authenticationRequest.getUsername(), 
+							final Authentication authentication = authenticationManager.authenticate(
+									new UsernamePasswordAuthenticationToken(authenticationRequest.getEmailId(),
+											// authenticationRequest.getUsername(),
 											authenticationRequest.getPassword()));
-//							System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^6");
 							SecurityContextHolder.getContext().setAuthentication(authentication);
-//							System.out.println("Token Creation------------in facebook------------");
 
 							// token creation
 							User user = (User) authentication.getPrincipal();
 							if (authentication.isAuthenticated()) {
-//								System.out.println("              is   AUTHENTICATED                      ");
+								// System.out.println(" is AUTHENTICATED ");
 
-//								System.out.println(SecurityContextHolder.getContext().getAuthentication());
-								user.setDeviceId(authenticationRequest.getDeviceId());//  save Device Id
+								// System.out.println(SecurityContextHolder.getContext().getAuthentication());
+								user.setDeviceId(authenticationRequest.getDeviceId());// save
+																						// Device
+																						// Id
 								userService.save(user);
-								
+
 								responseEntity = verifiedUser(user, device);
 
 							}
@@ -117,18 +116,20 @@ public class LoginController {
 
 					try {
 						// Perform the security
-						final Authentication authentication = authenticationManager
-								.authenticate(new UsernamePasswordAuthenticationToken(
-										 authenticationRequest.getEmailId(),
-//										authenticationRequest.getUsername(),
+						final Authentication authentication = authenticationManager.authenticate(
+								new UsernamePasswordAuthenticationToken(authenticationRequest.getEmailId(),
+										// authenticationRequest.getUsername(),
 										authenticationRequest.getPassword()));
 						SecurityContextHolder.getContext().setAuthentication(authentication);
-//						System.out.println("Token Creation------------------------");
+						// System.out.println("Token
+						// Creation------------------------");
 
 						// token creation
 						User user = (User) authentication.getPrincipal();
 						if (authentication.isAuthenticated()) {
-							user.setDeviceId(authenticationRequest.getDeviceId());//  save Device Id
+							user.setDeviceId(authenticationRequest.getDeviceId());// save
+																					// Device
+																					// Id
 							userService.save(user);
 							responseEntity = verifiedUser(user, device);
 							// SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -140,20 +141,21 @@ public class LoginController {
 						return ResponseEntity.ok(new UserSignInToken(false, false, "Password  not matched"));
 
 					}
-//					responseEntity = verifiedUser(registerWithEmail, device);
+					// responseEntity = verifiedUser(registerWithEmail, device);
 				}
 
 			} else {
-				return ResponseEntity.ok(
-						new UserSignInToken(false, false, false, authenticationRequest.getEmailId() + " not registered"));
+				return ResponseEntity.ok(new UserSignInToken(false, false, false,
+						authenticationRequest.getEmailId() + " not registered"));
 			}
 		}
-		/*else {
-			return ResponseEntity.ok(
-					new UserSignInToken(false, "Email " + authenticationRequest.getEmailId() + " not registered."));
+		/*
+		 * else { return ResponseEntity.ok( new UserSignInToken(false, "Email "
+		 * + authenticationRequest.getEmailId() + " not registered."));
+		 * 
+		 * }
+		 */
 
-		}*/
-		
 		return responseEntity;
 
 	}
@@ -165,20 +167,20 @@ public class LoginController {
 
 		if (user.isVerifyByUser()) {
 
-			/*if (user.getKycFrontPic() != null && user.getKycBackPic() != null) {
-				idProof = true;
-			}*/
-			if ((user.getKycFrontPic() != null && user.getKycBackPic() != null)  && 
-					( user.getKycFrontPic() == "" && user.getKycBackPic() == "")
-					) {
-//				System.out.println("^^^^^^^^^^^^^^^idProof^^^^^^^^^^^^^^^^^^");
+			/*
+			 * if (user.getKycFrontPic() != null && user.getKycBackPic() !=
+			 * null) { idProof = true; }
+			 */
+			if ((user.getKycFrontPic() != null && user.getKycBackPic() != null)
+					&& (user.getKycFrontPic() == "" && user.getKycBackPic() == "")) {
+				// System.out.println("^^^^^^^^^^^^^^^idProof^^^^^^^^^^^^^^^^^^");
 				idProof = true;
 			}
 			return ResponseEntity.ok(new UserSignInToken(jws, expiresIn, user.getId(), true, user.getFirstName(),
 					user.isLoginProvier(), idProof, true, "Account verified", user.getProfilePic()));
 
 		} else {
-//			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+			// System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 			StringBuilder otp = GenerateOTP.generateOtp();
 			user.setOtp(otp.toString());
 			user.setOtpGeneratedDate(new Date());
@@ -195,7 +197,6 @@ public class LoginController {
 							idProof, false, "Account not verfied ,Please check mail for OTP", user.getProfilePic()));
 
 		}
-		
 
 	}
 

@@ -30,9 +30,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.thinkss.paycheck.bean.PreviousAppliedLoanBean;
 import com.thinkss.paycheck.config.WebSecurityConfig;
 import com.thinkss.paycheck.entity.BankDetails;
 import com.thinkss.paycheck.entity.DocumentDetails;
@@ -94,11 +97,10 @@ public class DocumentController {
 //	@PreAuthorize("hasRole('USER')")
 	public ResponseEntity<?> saveProfilePics(@PathVariable("id") long id, @RequestParam("file") MultipartFile file,
 			HttpServletRequest request) throws IOException {
-		System.out.println("$$$$$$$$$$$$$$$$");
-		final long limit = 2 * 1024 * 1024;    // 2 MB
-	    if (file.getSize() > limit) {
-	        throw new MaxUploadSizeExceededException(limit);
-	    }
+		final long limit = 2 * 1024 * 1024; // 2 MB
+		if (file.getSize() > limit) {
+			throw new MaxUploadSizeExceededException(limit);
+		}
 
 		User currentUser = userService.findById(id);
 		if (currentUser == null) {
@@ -109,8 +111,8 @@ public class DocumentController {
 		// String folder = "/image/profile_pic/";
 		String folder = "/opt/image/profile_pic/";
 		if (!file.isEmpty()) {
-			if (fileType.equalsIgnoreCase("png") || fileType.equalsIgnoreCase("jpg") ||
-					 fileType.equalsIgnoreCase("jpeg")) {
+			if (fileType.equalsIgnoreCase("png") || fileType.equalsIgnoreCase("jpg")
+					|| fileType.equalsIgnoreCase("jpeg")) {
 				try {
 					saveImage(file, request, folder, currentUser, fileType);
 					String contextPath = request.getContextPath();
@@ -151,7 +153,6 @@ public class DocumentController {
 		// String folder = "/image/kyc_document/" + imageSide + "/";
 		String folder = "/opt/image/kyc_document/" + imageSide + "/";
 
-		System.out.println(fileType);
 
 		if (!file.isEmpty()) {
 			if (fileType.equalsIgnoreCase("pdf") || fileType.equalsIgnoreCase("png") || fileType.equalsIgnoreCase("jpg")
@@ -196,10 +197,7 @@ public class DocumentController {
 	@RequestMapping(value = "/upload/user/{id}", method = RequestMethod.POST)
 	public ResponseEntity<?> uploadDocument(@PathVariable("id") long id, @RequestParam("file") MultipartFile file,
 			HttpServletRequest request, @RequestParam("documentType") Long documentTypeId,
-			@RequestParam("documentSubType") Long documentSubTypeId
-	// ,@RequestParam("tokenId") String tokenId
-	) throws IOException {
-System.out.println("****************************8");
+			@RequestParam("documentSubType") Long documentSubTypeId) throws IOException {
 		User currentUser = userService.findById(id);
 
 		if (currentUser == null) {
@@ -227,9 +225,7 @@ System.out.println("****************************8");
 									+ "/";
 							// String folder = "/opt/image/profile_pic/";
 
-							DocumentDetails docDetail = docservice.findDocumentDetailByUser(currentUser, documentTypes,
-									documentSubType);
-							System.out.println(docDetail);
+							DocumentDetails docDetail = docservice.findDocumentDetailByUser(currentUser, documentTypes, documentSubType);
 							String folder1 = "/resources/image/" + documentTypes.getName() + "/"
 									+ documentSubType.getLocation() + "/";
 							if (docDetail == null) {
@@ -239,6 +235,7 @@ System.out.println("****************************8");
 								di.setUser(currentUser);
 								di.setImageSource(StaticIP.IP.concat(
 										contextPath.concat(folder1).concat(currentUser.getEmailId()) + "." + fileType));
+								di.setActive(true);// during upload document
 								documentDetailRepository.save(di);
 								// map.put(di.getDocumentSubType().getName(), di.getImageSource());
 								map.put("documentSource", di.getImageSource());
@@ -246,6 +243,7 @@ System.out.println("****************************8");
 							} else {
 								docDetail.setImageSource(StaticIP.IP.concat(
 										contextPath.concat(folder1).concat(currentUser.getEmailId()) + "." + fileType));
+								docDetail.setActive(true);// during upload document
 								documentDetailRepository.save(docDetail);
 								// map.put(docDetail.getDocumentSubType().getName(),
 								// docDetail.getImageSource());
@@ -263,7 +261,6 @@ System.out.println("****************************8");
 					map.put("status", true);
 					return ResponseEntity.ok(map);
 				} catch (Exception e) {
-					System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^");
 					return ResponseEntity.ok(new DocumentMessageResponse(false, e.getMessage()));
 				}
 			} else {
@@ -283,23 +280,26 @@ System.out.println("****************************8");
 
 		Collection<DocumentType> collection = new ArrayList<>();
 		docList.forEach(collection::add);
-		System.out.println(collection.size());
 
 		List<DocumentType> docList1 = new ArrayList<DocumentType>();
 		User currentUser = userService.findById(id);
 		for (DocumentType docType : collection) {
-			System.out.println(docType.getName());
 
 			List<Object> items = new ArrayList<Object>();
+			List<BankDetails> bankDetailList = new ArrayList<BankDetails>();
 			List<DocumentSubType> listOfSubType = docservice.findByDocumentType(docType);
 
 			for (DocumentSubType subType : listOfSubType) {
 				BankDetails bankDetails = new BankDetails();
+				BankDetails bankDetail = new BankDetails();
 				boolean status = false;
 				DocumentDetails docDetail = docservice.findDocumentDetailByUser(currentUser, docType, subType);
-				System.out.println(docDetail);
 				if (docDetail != null) {
-					if (docDetail.getImageSource() != null && !docDetail.getImageSource().trim().equals("")) {
+					/*
+					 * if (docDetail.getImageSource() != null &&
+					 * !docDetail.getImageSource().trim().equals("")) { status = true; }
+					 */
+					if (docDetail.isActive()) {
 						status = true;
 					}
 				}
@@ -307,8 +307,11 @@ System.out.println("****************************8");
 				bankDetails.setName(subType.getName());
 				bankDetails.setStatus(status);
 				items.add(bankDetails);
+//				bankDetailList.add(bankDetails);
 			}
+
 			docType.setItems(items);
+//			docType.setBankdetails(bankDetailList);
 			docList1.add(docType);
 		}
 		map.put("root", docList1);
@@ -330,25 +333,52 @@ System.out.println("****************************8");
 				new FileOutputStream(new File(file1 + "/" + currentUser.getEmailId() + "." + fileType)));
 		stream.write(bytes);
 		stream.close();
-		System.out.println("********************************************************");
 
 	}
-	
-	
-	 @ExceptionHandler(FileExceedException.class)
-	    public ResponseEntity<?> handleStorageFileNotFound(FileExceedException exc) {
-		 System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7");
-	        return ResponseEntity.notFound().build();
-	    }
-	
-	
-	@RequestMapping(value = "/user/{id}/test", method = RequestMethod.GET) // method should get
-	public ResponseEntity<?> getException(@PathVariable("id") long id) {
-		
-		throw new FileExceedException("messageggggggggggg");
-		
-//		return null;
-		
+
+	@ExceptionHandler(FileExceedException.class)
+	public ResponseEntity<?> handleStorageFileNotFound(FileExceedException exc) {
+		return ResponseEntity.notFound().build();
+	}
+
+	@RequestMapping(value = "/user/{id}/updateDocument/{subDocId}", method = RequestMethod.POST) // method should get
+	public ResponseEntity<?> updateSocialId(@PathVariable("id") long id, @PathVariable("subDocId") long docId,
+			HttpServletRequest request, @RequestBody DocumentDetails docdetails
+
+	) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		System.out.println(docdetails.getText());
+
+		User user = userService.findById(id);
+		DocumentSubType docSubType = documentSubTypeRepository.findOne(docId);
+		List<DocumentDetails> docList = user.getDocumentDetails();
+		DocumentDetails doc = docservice.findDocumentDetailByUser(user, docSubType.getDocumentType(), docSubType);
+		if (doc != null) {
+			if (docSubType.getId().equals(Long.valueOf(8))) {
+//					doc.setFacebookActive(false);
+//					doc.setActive(false);
+				doc.setImageSource(docdetails.getText());
+				documentDetailRepository.save(doc);
+			}
+
+		} else {
+			DocumentDetails docDetail = new DocumentDetails();
+			docDetail.setUser(user);
+			docDetail.setDcumentType(docSubType.getDocumentType());
+			docDetail.setDocumentSubType(docSubType);
+			if (docSubType.getId().equals(Long.valueOf(8))) {
+//					docDetail.setFacebookActive(true);	
+				docDetail.setActive(true);
+				docDetail.setImageSource(docdetails.getText());
+			}
+
+			DocumentDetails ducumentDetail = documentDetailRepository.save(docDetail);
+		}
+		map.put("success", true);
+		map.put("status", true);
+
+		return ResponseEntity.ok(map);
+
 	}
 
 }

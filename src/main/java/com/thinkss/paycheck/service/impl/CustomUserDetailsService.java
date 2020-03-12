@@ -26,7 +26,7 @@ import com.thinkss.paycheck.repository.UserRepository;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-	protected final Log LOGGER = LogFactory.getLog(getClass());
+	protected final Log LOGGER = LogFactory.getLog(CustomUserDetailsService.class);
 
 	@Autowired
 	private UserRepository userRepository;
@@ -85,14 +85,18 @@ public class CustomUserDetailsService implements UserDetailsService {
 			LOGGER.debug("Re-authenticating user '" + username + "' for password change request.");
 			boolean auth = false;
 			try {
-				final Authentication authentication = authenticationManager
-						.authenticate(new UsernamePasswordAuthenticationToken(username, oldPassword));
+				final Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, oldPassword));
 
 				if (authentication.isAuthenticated()) {
 					User user = (User) loadUserByUsername(username);
 
 					user.setPassword(passwordEncoder.encode(newPassword));
 					userRepository.save(user);
+					
+//					final Authentication authentication = 
+//							authenticationManager.authenticate(
+//							new UsernamePasswordAuthenticationToken(username,
+//									newPassword));
 
 					auth = true;
 				}

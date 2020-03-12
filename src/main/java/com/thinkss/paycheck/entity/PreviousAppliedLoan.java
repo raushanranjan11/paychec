@@ -50,7 +50,7 @@ public class PreviousAppliedLoan implements Serializable {
 	
 	
 	@JsonIgnore
-	@ManyToOne(cascade = CascadeType.PERSIST,fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.DETACH,fetch = FetchType.LAZY)
 	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="user_id")
 	public User getUser() {
@@ -83,7 +83,7 @@ public class PreviousAppliedLoan implements Serializable {
 
 //	 @JsonProperty("rates")
 	@JsonIgnore
-		@ManyToOne(cascade = CascadeType.PERSIST,fetch = FetchType.LAZY)
+		@ManyToOne(cascade = CascadeType.DETACH,fetch = FetchType.LAZY)
 		@NotFound(action=NotFoundAction.IGNORE)
 		@JoinColumn(name="loan_type_id")
 	public LoanType getLoanType() {
@@ -144,7 +144,9 @@ public class PreviousAppliedLoan implements Serializable {
 		this.loanName = loanName;
 	}
 	@Column(name = "document")
-	@ElementCollection(targetClass=String.class)
+	@ElementCollection(targetClass=String.class,
+	fetch = FetchType.EAGER
+	)
 	public List<String> getDocumentList() {
 		return documentList;
 	}

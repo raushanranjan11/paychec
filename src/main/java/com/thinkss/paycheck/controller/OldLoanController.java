@@ -265,7 +265,8 @@ public class OldLoanController {
 		if(loan != null) {
 		
 //		appliedLoanRepository.delete(oldloanId);
-			loanService.deleteOldLoanByUser(currentUser,oldloanId);
+//			loanService.deleteOldLoanByUser(currentUser,oldloanId);
+			appliedLoanRepository.delete(loan);
 		map.put("status", true);
 		map.put("message", "Records is deleted");
 		}else {

@@ -1,6 +1,8 @@
 package com.thinkss.paycheck.entity;
 
-public class BankDetails {
+import java.io.Serializable;
+
+public class BankDetails implements Serializable{
 
 	
 	

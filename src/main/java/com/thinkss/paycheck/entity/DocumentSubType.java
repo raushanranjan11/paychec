@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -67,6 +68,23 @@ public class DocumentSubType implements Serializable{
 	}
 	public void setLocation(String location) {
 		this.location = location;
+	}
+	@Override
+	public String toString() {
+		return "DocumentSubType [id=" + id + ", name=" + name + ", documentType=" + documentType + ", location="
+				+ location + "]";
+	}
+	
+	
+	private String docSubName;
+
+
+	@Transient
+	public String getDocSubName() {
+		return docSubName;
+	}
+	public void setDocSubName(String docSubName) {
+		this.docSubName = docSubName;
 	}
 	
 	

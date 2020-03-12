@@ -14,5 +14,6 @@ public interface DocumentService {
 	public DocumentDetails findDocumentDetailByUser(User user, DocumentType documentTypes,DocumentSubType documentSubType);
 	
 	public List<DocumentSubType> findByDocumentType(DocumentType documentType);
+	public DocumentDetails findDocumentDetailByUser(User user, DocumentType documentTypes) ;
 
 }

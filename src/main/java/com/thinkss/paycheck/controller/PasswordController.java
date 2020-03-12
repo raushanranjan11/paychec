@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONException;
@@ -28,6 +29,7 @@ import com.thinkss.paycheck.bean.Registration;
 import com.thinkss.paycheck.entity.User;
 import com.thinkss.paycheck.entity.UserSignInToken;
 import com.thinkss.paycheck.exception.SessionExpiredException;
+import com.thinkss.paycheck.service.SentMailService;
 import com.thinkss.paycheck.service.UserService;
 import com.thinkss.paycheck.service.impl.CustomUserDetailsService;
 import com.thinkss.paycheck.util.GenerateOTP;
@@ -47,6 +49,9 @@ public class PasswordController {
 
 	@Autowired
 	private CustomUserDetailsService userDetailsService;
+	
+	@Autowired
+	private SentMailService sentMailService;
 
 	@RequestMapping(value = "/forgot", method = RequestMethod.POST, consumes = { "application/json" })
 	public ResponseEntity<?> getForgetPassword(@RequestBody Registration users, HttpServletRequest request) {
@@ -61,7 +66,17 @@ public class PasswordController {
 			userService.save(currentUser);
 
 			String title = "OTP";
-			SentMail.sendMail(currentUser, otp.toString(), title);
+//			SentMail.sendMail(currentUser, otp.toString(), title);
+			new Thread(new Runnable() {
+			    public void run() {
+			try {
+				sentMailService.sentMail(currentUser, otp.toString(), title);
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	}).start();
 			return ResponseEntity.ok(new UserSignInToken(true, "OTP has been sent to mail "));
 		} else {
 			return ResponseEntity.ok(new UserSignInToken(false, "User Not found "));

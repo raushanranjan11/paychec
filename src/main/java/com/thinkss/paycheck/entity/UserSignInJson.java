@@ -5,10 +5,11 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 //NON_NULL
-@JsonInclude(JsonInclude.Include.NON_ABSENT)// use for remove all default
+//@JsonInclude(JsonInclude.Include.NON_ABSENT)// use for remove all default//
 public class UserSignInJson {
 	
 		private String access_token;
@@ -22,7 +23,9 @@ public class UserSignInJson {
 	    private String message;
 	    private String profilePic;
 	    
+//	    @JsonInclude(JsonInclude.Include.NON_NULL) 
 	    private String kycFrontPic;
+//	    @JsonInclude(JsonInclude.Include.NON_NULL) 
 		private String kycBackPic;
 		
 		
@@ -220,8 +223,13 @@ public class UserSignInJson {
 			this.profilePic = profilePic;
 		}
 		@JsonCreator
+		
+//		@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 		public UserSignInJson(@JsonProperty("access_token")String access_token,@JsonProperty("expires_in") int expires_in, @JsonProperty("id")Long id, @JsonProperty("status")Boolean   status, @JsonProperty("firstName")String firstName,
-				@JsonProperty("isfacebookAccount")Boolean   isfacebookAccount, @JsonProperty("idProof")Boolean   idProof, @JsonProperty("verifiedUser")Boolean   verifiedUser, @JsonProperty("message")String message, @JsonProperty("profilePic")String profilePic) {
+				@JsonProperty("isfacebookAccount")Boolean   isfacebookAccount, @JsonProperty("idProof")Boolean   idProof, 
+				@JsonProperty("verifiedUser")Boolean   verifiedUser, @JsonProperty("message")String message,
+				@JsonProperty("profilePic")String profilePic,@JsonProperty("kycBackPic")String kycBackPic,
+				@JsonProperty("kycFrontPic")String kycFrontPic) {
 			this.access_token = access_token;
 			this.expires_in = expires_in;
 			this.id = id;
@@ -232,6 +240,9 @@ public class UserSignInJson {
 			this.verifiedUser = verifiedUser;
 			this.message = message;
 			this.profilePic = profilePic;
+			
+			this.kycFrontPic = kycFrontPic;
+			this.kycBackPic = kycBackPic;
 		}
 	    
 

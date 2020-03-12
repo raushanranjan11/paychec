@@ -1,6 +1,7 @@
 package com.thinkss.paycheck.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -15,9 +16,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @Table(name = "document_type")
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class DocumentType  implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
@@ -25,7 +28,7 @@ public class DocumentType  implements Serializable{
 	private String name;
 	private List<DocumentSubType> documentList;
 	
-	private List<Object> items;
+	private List<Object> items  = new ArrayList<Object>();
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +63,23 @@ public class DocumentType  implements Serializable{
 	public void setItems(List<Object> items) {
 		this.items = items;
 	}
+	/*@Override
+	public String toString() {
+		return "DocumentType [id=" + id + ", name=" + name + ", documentList=" + documentList + ", items=" + items
+				+ "]";
+	}*/
+	
+	private List<DocumentSubType> subTypeList;
+
+	@Transient
+	public List<DocumentSubType> getSubTypeList() {
+		return subTypeList;
+	}
+	public void setSubTypeList(List<DocumentSubType> subTypeList) {
+		this.subTypeList = subTypeList;
+	}
+	
+	
 	
 	
 	

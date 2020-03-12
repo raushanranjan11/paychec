@@ -61,6 +61,12 @@ public class User implements Serializable{
 //package com.thinkss.paycheck.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 //import org.joda.time.DateTime;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -88,6 +94,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "USERS")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements UserDetails {
 
 	@Id
@@ -164,6 +171,17 @@ public class User implements UserDetails {
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd", timezone="IST")
 	@Column(name = "birth_date")
 	private Date birthDate;
+	
+	
+	private String profilePic;
+	private String kycFrontPic;
+	private String kycBackPic;
+	
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.ALL,	fetch = FetchType.LAZY, mappedBy = "user")
+//	@Fetch(value = FetchMode.SUBSELECT)
+//	@JsonIgnore
+	private List<Loan> loan;
 	
 	public Date getBirthDate() {
 		return birthDate;
@@ -333,9 +351,7 @@ public class User implements UserDetails {
 	}
 	
 	
-	private String profilePic;
-	private String kycFrontPic;
-	private String kycBackPic;
+	
 	
 	@Column(name = "profile_pic")
 	public String getProfilePic() {
@@ -381,8 +397,7 @@ public class User implements UserDetails {
 	}
 	
 	
-	@OneToMany(cascade = CascadeType.ALL,	fetch = FetchType.LAZY, mappedBy = "user")
-	private List<Loan> loan;
+	
 //	@JsonIgnore
 	 // @Fetch(value = FetchMode.SUBSELECT) 
 	
@@ -420,5 +435,17 @@ private List<DocumentDetails>  documentDetails;
 
 	
 	
+	private int active;
+	
+	
+	@Column(name = "active")
+	public int getActive() {
+		return active;
+	}
+
+	public void setActive(int active) {
+		this.active = active;
+	}
+
 
 }

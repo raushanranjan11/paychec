@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import com.thinkss.paycheck.bean.Registration;
 import com.thinkss.paycheck.entity.DocumentDetails;
 import com.thinkss.paycheck.entity.DocumentSubType;
 import com.thinkss.paycheck.entity.User;
+import com.thinkss.paycheck.entity.UserJson;
 import com.thinkss.paycheck.entity.UserSignInToken;
 import com.thinkss.paycheck.entity.UserTokenState;
 import com.thinkss.paycheck.repository.AuthorityRepository;
@@ -37,6 +39,7 @@ import com.thinkss.paycheck.repository.DocumentDetailRepository;
 import com.thinkss.paycheck.repository.DocumentSubTypeRepository;
 import com.thinkss.paycheck.repository.UserRepository;
 import com.thinkss.paycheck.security.TokenHelper;
+import com.thinkss.paycheck.service.SentMailService;
 import com.thinkss.paycheck.service.UserService;
 import com.thinkss.paycheck.util.GenerateOTP;
 import com.thinkss.paycheck.util.SentMail;
@@ -71,11 +74,11 @@ public class UserRegistraionController {
 
 	@Autowired
 	TokenHelper tokenHelper;
+	
+	@Autowired
+	private SentMailService sentMailService;
+	
 
-	@RequestMapping("/")
-	public String hello() {
-		return "Hi Paycheck";
-	}
 
 	@RequestMapping("/hello")
 	public String hello1() {
@@ -107,13 +110,18 @@ public class UserRegistraionController {
 			if (matchedUser.getKycFrontPic() != null && matchedUser.getKycBackPic() != null) {
 				idProof = true;
 			}
-			matchedUser.setProfilePic(registration.getProfilePic());
+//			matchedUser.setProfilePic(registration.getProfilePic());
+//			matchedUser.setFirstName(registration.getFirstName());//(registration.getProfilePic());
 			System.out.println("^^^^^^^^             " + registration.getProfilePic());
-			userService.save(matchedUser);
+//			User savedUser = userService.save(matchedUser);
 
-			return ResponseEntity.ok(new UserTokenState(jws, expiresIn, matchedUser.getId(), true,
+			return ResponseEntity.ok(new UserJson(jws, expiresIn, matchedUser.getId(), true,
 					matchedUser.getFirstName(), matchedUser.isLoginProvier(), idProof, matchedUser.isVerifyByUser(),
-					matchedUser.getProfilePic()));
+					matchedUser.getProfilePic(),matchedUser.getKycBackPic(),matchedUser.getKycFrontPic()));
+			
+			/*return ResponseEntity.ok(new UserTokenState(jws, expiresIn, savedUser.getId(), true,
+					savedUser.getFirstName(), savedUser.isLoginProvier(), idProof, savedUser.isVerifyByUser(),
+					savedUser.getProfilePic()));*/
 
 		} 
 			else if (registerWithEmail != null ) {
@@ -145,9 +153,9 @@ public class UserRegistraionController {
 				System.out.println("^^^^^^^^             " + registration.getProfilePic());
 //				userService.save(matchedUser);
 
-				return ResponseEntity.ok(new UserTokenState(jws, expiresIn, facebookSavedUser.getId(), true,
+				return ResponseEntity.ok(new UserJson(jws, expiresIn, facebookSavedUser.getId(), true,
 						facebookSavedUser.getFirstName(), facebookSavedUser.isLoginProvier(), idProof, facebookSavedUser.isVerifyByUser(),
-						facebookSavedUser.getProfilePic()));
+						facebookSavedUser.getProfilePic(),facebookSavedUser.getKycBackPic(),facebookSavedUser.getKycFrontPic()));
 
 			} 
 			
@@ -185,9 +193,9 @@ public class UserRegistraionController {
 			 * facebookSavedUser.getId(), true, facebookSavedUser.getFirstName()));
 			 */
 
-			return ResponseEntity.ok(new UserTokenState(jws, expiresIn, facebookSavedUser.getId(), true,
+			return ResponseEntity.ok(new UserJson(jws, expiresIn, facebookSavedUser.getId(), true,
 					facebookSavedUser.getFirstName(), facebookSavedUser.isLoginProvier(), false,
-					facebookSavedUser.isVerifyByUser(), facebookSavedUser.getProfilePic()));
+					facebookSavedUser.isVerifyByUser(), facebookSavedUser.getProfilePic(),user.getKycBackPic(),user.getKycFrontPic()));
 		}
 	}
 
@@ -260,7 +268,24 @@ public class UserRegistraionController {
 					documentDetailRepository.save(documentDetails);
 				}
 			}
-			SentMail.sendMail(savedUser, otp.toString(), title);
+//			SentMail.sendMail(savedUser, otp.toString(), title);
+			/*try {
+				sentMailService.sentMail(user, otp.toString(), title);
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+			new Thread(new Runnable() {
+			    public void run() {
+			try {
+				sentMailService.sentMail(user, otp.toString(), title);
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+			}).start();
+			
 			status.put("status", true);
 			status.put("verify", savedUser.isVerifyByUser());
 			status.put("id", savedUser.getId());

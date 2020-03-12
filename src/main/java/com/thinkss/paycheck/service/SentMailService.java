@@ -8,4 +8,5 @@ public interface SentMailService {
 
 	
 	 public void sentMail(User user, String txtmessage, String title )throws MessagingException  ;
+	 public void sentMailOnLoanApply(User user, String txtmessage, String title) throws MessagingException  ;
 }

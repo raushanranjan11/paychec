@@ -3,6 +3,7 @@ package com.thinkss.paycheck.controller;
 import java.io.IOException;
 import java.util.Date;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import com.thinkss.paycheck.entity.UserSignInToken;
 import com.thinkss.paycheck.repository.UserRepository;
 import com.thinkss.paycheck.security.TokenHelper;
 import com.thinkss.paycheck.security.auth.JwtAuthenticationRequest;
+import com.thinkss.paycheck.service.SentMailService;
 import com.thinkss.paycheck.service.UserService;
 import com.thinkss.paycheck.util.GenerateOTP;
 import com.thinkss.paycheck.util.SentMail;
@@ -49,20 +51,19 @@ public class LoginsController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private SentMailService sentMailService;
+
+	// paychec mobile app  login
 	@RequestMapping(value = "/login", method = RequestMethod.POST, consumes = { "application/json" })
 	public ResponseEntity<?> createAuthenticationTokens(@RequestBody JwtAuthenticationRequest authenticationRequest,
 			HttpServletResponse response, Device device) throws AuthenticationException, IOException {
-
-		System.out.println("sign User  " + authenticationRequest.getEmailId() + " " + authenticationRequest.getPassword());
-		
+		logger.info("Authentication Request    " + authenticationRequest.toString());
 		UserSignInJson userSignInJson = null;
 		if (authenticationRequest.getEmailId() != null && authenticationRequest.getEmailId() != "") {
-
 			User registerWithEmail = userRepository.findByEmailId(authenticationRequest.getEmailId());
-
 			if (registerWithEmail != null) {
 				if (registerWithEmail.isLoginProvier()) {
-					System.out.println("Facebook login");
 					if (registerWithEmail.getPassword() == null) {
 						boolean idProof = false;
 						idProof = isIdProof(registerWithEmail);
@@ -73,17 +74,14 @@ public class LoginsController {
 
 					} else {
 						try {
-							// Perform the security
 							final Authentication authentication = authenticationManager.authenticate(
 									new UsernamePasswordAuthenticationToken(authenticationRequest.getEmailId(),
 											authenticationRequest.getPassword()));
 							SecurityContextHolder.getContext().setAuthentication(authentication);
-							// System.out.println("Token Creation------------in facebook------------");
 
 							User user = (User) authentication.getPrincipal();
 							if (authentication.isAuthenticated()) {
-
-								user.setDeviceId(authenticationRequest.getDeviceId());// save Device Id
+								user.setDeviceId(authenticationRequest.getDeviceId()); 
 								userService.save(user);
 								userSignInJson = verifiedUser(user, device);
 
@@ -94,19 +92,16 @@ public class LoginsController {
 					}
 				} else {
 
-					System.out.println("Not facebook account ,Logged in with Email");
-
+					logger.info("Not facebook account ,Logged in with Email");
 					try {
 						// Perform the security
 						final Authentication authentication = authenticationManager.authenticate(
 								new UsernamePasswordAuthenticationToken(authenticationRequest.getEmailId(),
 										authenticationRequest.getPassword()));
 						SecurityContextHolder.getContext().setAuthentication(authentication);
-
-						// token creation
 						User user = (User) authentication.getPrincipal();
 						if (authentication.isAuthenticated()) {
-							user.setDeviceId(authenticationRequest.getDeviceId());// save Device Id
+							user.setDeviceId(authenticationRequest.getDeviceId());
 							userService.save(user);
 
 							userSignInJson = verifiedUser(user, device);
@@ -139,7 +134,8 @@ public class LoginsController {
 		if (user.isVerifyByUser()) {
 			idProof = isIdProof(user);
 			return new UserSignInJson(jws, expiresIn, user.getId(), true, user.getFirstName(), user.isLoginProvier(),
-					idProof, true, "Account verified", user.getProfilePic());
+					idProof, true, "Account verified", user.getProfilePic(), user.getKycBackPic(),
+					user.getKycFrontPic());
 
 		} else {
 			StringBuilder otp = GenerateOTP.generateOtp();
@@ -147,11 +143,26 @@ public class LoginsController {
 			user.setOtpGeneratedDate(new Date());
 			String title = "OTP";
 			userService.save(user);
-
-			SentMail.sendMail(user, otp.toString(), title);
+			/*try {
+				sentMailService.sentMail(user, otp.toString(), title);
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+			new Thread(new Runnable() {
+			    public void run() {
+			try {
+				sentMailService.sentMail(user, otp.toString(), title);
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	}).start();
 			idProof = isIdProof(user);
 			return new UserSignInJson(jws, expiresIn, user.getId(), true, user.getFirstName(), user.isLoginProvier(),
-					idProof, false, "Account not verfied ,Please check mail for OTP", user.getProfilePic());
+					idProof, false, "Account not verfied ,Please check mail for OTP", user.getProfilePic(),
+					user.getKycBackPic(), user.getKycFrontPic());
 
 		}
 

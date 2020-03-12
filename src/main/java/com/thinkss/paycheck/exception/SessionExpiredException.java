@@ -1,8 +1,13 @@
 package com.thinkss.paycheck.exception;
 
-public class SessionExpiredException extends Exception {
+public class SessionExpiredException extends RuntimeException {
 	 
-    public SessionExpiredException(String message) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public SessionExpiredException(String message) {
         super(message);
     }
 }
