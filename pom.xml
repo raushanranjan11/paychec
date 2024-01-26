@@ -245,7 +245,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.7.0</version>
+					<version>3.8.0</version>
 
 					<!-- <configuration> <source>1.8</source> <target>1.8</target> </configuration> -->
 
@@ -254,7 +254,7 @@
 						<target>1.8</target>
 						<fork>true</fork>
 						<!-- <executable>C:\Program Files\Java\jdk1.8.0_171\bin\javac</executable> -->
-						<executable>C:\Program Files\Java\jdk1.8.0_171\bin\javac</executable>
+						<executable>C:\Program Files (x86)\Java\jdk1.8.0_92\bin\javac</executable>
 						<!-- <forceRegenerate>false</forceRegenerate> -->
 					</configuration>
 				</plugin>
